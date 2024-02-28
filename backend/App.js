@@ -17,10 +17,12 @@ app.use(express.static("public"));
 app.use(cookieParser());
 
 //routes import
+import jobRoute from "./routes/job.route.js";
 import router from "./routes/auth.route.js";
 //
 //routes declaration
 app.use("/api/v1/auth", router);
 // http://localhost:8000/api/v1/users/register
+app.use("/api/v1/job", jobRoute);
 
 export { app };

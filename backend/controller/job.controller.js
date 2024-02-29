@@ -45,4 +45,52 @@ const editJob = async (req, res) => {
     console.log(error);
   }
 };
-export { createJob, editJob };
+const JobDescription = async (req, res) => {
+  try {
+    const jobId = req.params.jobId;
+    if (!jobId) {
+      return res.status(400).json({
+        errorMessage: "Bad Request",
+      });
+    }
+    const jobDetails = await Job.findById(jobId);
+    res.json({ data: jobDetails });
+  } catch (error) {
+    console.log(error);
+  }
+};
+const viewAlljobListed = async (req, res) => {
+  try {
+    // const { title, skills, filterSkills } = req.query;
+    const title = req.query.title || "";
+    const skills = req.query.skills;
+    let filterSkills = skills?.split(",");
+
+    let filter = {};
+    if (filterSkills) {
+      filter = {
+        skills: [...filterSkills],
+      };
+    }
+    const jobList = await Job.findById({
+      title: {
+        $regex: title,
+        $options: "i",
+      },
+      ...filter,
+    });
+    res.json({ data: jobList });
+  } catch (error) {
+    console.log(error);
+  }
+};
+const deleteById = async (req, res) => {
+  try {
+    const title = req.query.title || "";
+    const jobList = await Job.deleteById(jobId);
+    res.json({ data: jobList });
+  } catch (error) {
+    console.log(error);
+  }
+};
+export { createJob, editJob, JobDescription, viewAlljobListed, deleteById };

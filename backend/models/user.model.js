@@ -1,5 +1,6 @@
 import mongoose from "mongoose";
-
+import bcrypt from "bcryptjs";
+import jwt from "jsonwebtoken";
 const userSchema = new mongoose.Schema(
   {
     name: {
@@ -11,7 +12,7 @@ const userSchema = new mongoose.Schema(
     email: {
       type: String,
       required: [true, "Please enter your Email!"],
-      validate: [validator.isEmail, "Please provide a valid Email!"],
+      // validate: [validator.isEmail, "Please provide a valid Email!"],
     },
     phone: {
       type: Number,
@@ -39,4 +40,20 @@ const userSchema = new mongoose.Schema(
     versionKey: false,
   }
 );
+//ENCRYPTING THE PASSWORD WHEN THE USER REGISTERS OR MODIFIES HIS PASSWORD
+userSchema.pre("save", async function (next) {
+  if (!this.isModified("password")) {
+    return next();
+  }
+  this.password = await bcrypt.hash(this.password, 10);
+});
+userSchema.methods.comparePassword = async function (enteredPassword) {
+  return await bcrypt.compare(enteredPassword, this.password);
+};
+userSchema.methods.getJWTToken = function () {
+  return jwt.sign({ id: this._id }, process.env.JWT_SECRET_KEY, {
+    expiresIn: "2d",
+  });
+};
+
 export const User = mongoose.model("User", userSchema);

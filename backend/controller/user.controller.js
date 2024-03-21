@@ -3,6 +3,7 @@ import { ApiError } from "../utility/apiError.js";
 import { asyncHandler } from "../utility/asyncHandler.js";
 import { ApiResponse } from "../utility/ApiResponse.js";
 import { sendToken } from "../utility/jwttoken.js";
+
 export const Register = asyncHandler(async (req, res, next) => {
   const { fullName, email, phoneNumber, password, role } = req.body;
   console.log(fullName, email, phoneNumber, password);

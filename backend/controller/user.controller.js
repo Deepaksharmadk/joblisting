@@ -3,10 +3,10 @@ import { ApiError } from "../utility/apiError.js";
 import { asyncHandler } from "../utility/asyncHandler.js";
 import { ApiResponse } from "../utility/ApiResponse.js";
 import { sendToken } from "../utility/jwttoken.js";
-const Register = asyncHandler(async (req, res, next) => {
-  const { name, email, phone, password, role } = req.body;
-  console.log(name, email, phone, password);
-  if (!name || !email || !phone || !password || !role) {
+const Register = asyncHandler(async (req, res) => {
+  const { fullName, email, phoneNumber, password, role } = req.body;
+  console.log(fullName, email, phoneNumber, password);
+  if (!fullName || !email || !phoneNumber || !password || !role) {
     throw new ApiError(400, "All fields are required");
   }
   const isEmail = await User.findOne({ email });
@@ -14,9 +14,9 @@ const Register = asyncHandler(async (req, res, next) => {
     throw new ApiError(409, "User with email or username already exists");
   }
   const user = await User.create({
-    name,
+    fullName,
     email,
-    phone,
+    phoneNumber,
     password,
     role,
   });
@@ -27,6 +27,26 @@ const Register = asyncHandler(async (req, res, next) => {
     throw new ApiError(500, "Something went wrong while registering the user");
   }
   sendToken(user, 201, res, "User Registered!");
+  return res
+    .status(201)
+    .json(new ApiResponse(200, createdUser, "User registered Successfully"));
 });
-
+export const Login = asyncHandler(async (req, res) => {
+  const { email, password, role } = req.body;
+  if (!email || !password || !role) {
+    throw new ApiError(500, "Please provide email ,password and role.");
+  }
+  const user = await User.findOne({ email }).select("+password");
+  if (!user) {
+    throw new ApiError(400, "invalid Email Or Password..");
+  }
+  const isPasswordMatched = await user.comparePassword(password);
+  if (!isPasswordMatched) {
+    throw new ApiError(400, "invalid Email Or Password..");
+  }
+  if (user.role !== role) {
+    throw new ApiError(400, `User with provided email and ${role} not found!`);
+  }
+  sendToken(user, 201, res, "User Logged In!");
+});
 export { Register };

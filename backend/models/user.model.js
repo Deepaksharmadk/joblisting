@@ -3,7 +3,7 @@ import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 const userSchema = new mongoose.Schema(
   {
-    name: {
+    fullName: {
       type: String,
       required: [true, "Please enter your Name!"],
       minLength: [3, "Name must contain at least 3 Characters!"],
@@ -11,10 +11,11 @@ const userSchema = new mongoose.Schema(
     },
     email: {
       type: String,
+      unique: true,
       required: [true, "Please enter your Email!"],
       // validate: [validator.isEmail, "Please provide a valid Email!"],
     },
-    phone: {
+    phoneNumber: {
       type: Number,
       required: [true, "Please enter your Phone Number!"],
     },
@@ -30,10 +31,6 @@ const userSchema = new mongoose.Schema(
       required: [true, "Please select a role"],
       enum: ["Job Seeker", "Employer"],
     },
-    createdAt: {
-      type: Date,
-      default: Date.now,
-    },
   },
   {
     timestamps: true,
@@ -43,7 +40,7 @@ const userSchema = new mongoose.Schema(
 //ENCRYPTING THE PASSWORD WHEN THE USER REGISTERS OR MODIFIES HIS PASSWORD
 userSchema.pre("save", async function (next) {
   if (!this.isModified("password")) {
-    return next();
+    next();
   }
   this.password = await bcrypt.hash(this.password, 10);
 });

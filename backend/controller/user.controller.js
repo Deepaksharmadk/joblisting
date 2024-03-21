@@ -3,7 +3,7 @@ import { ApiError } from "../utility/apiError.js";
 import { asyncHandler } from "../utility/asyncHandler.js";
 import { ApiResponse } from "../utility/ApiResponse.js";
 import { sendToken } from "../utility/jwttoken.js";
-const Register = asyncHandler(async (req, res) => {
+export const Register = asyncHandler(async (req, res, next) => {
   const { fullName, email, phoneNumber, password, role } = req.body;
   console.log(fullName, email, phoneNumber, password);
   if (!fullName || !email || !phoneNumber || !password || !role) {
@@ -31,7 +31,7 @@ const Register = asyncHandler(async (req, res) => {
     .status(201)
     .json(new ApiResponse(200, createdUser, "User registered Successfully"));
 });
-export const Login = asyncHandler(async (req, res) => {
+export const Login = asyncHandler(async (req, res, next) => {
   const { email, password, role } = req.body;
   if (!email || !password || !role) {
     throw new ApiError(500, "Please provide email ,password and role.");
@@ -49,4 +49,22 @@ export const Login = asyncHandler(async (req, res) => {
   }
   sendToken(user, 201, res, "User Logged In!");
 });
-export { Register };
+export const Logout = asyncHandler(async (req, res, next) => {
+  res
+    .status(201)
+    .cookie("token", "", {
+      httpOnly: true,
+      expires: new Date(Date.now()),
+    })
+    .json({
+      success: true,
+      message: "Logged Out Successfully.",
+    });
+});
+export const getUser = asyncHandler(async (req, res, next) => {
+  const user = req.user;
+  res.status(200).json({
+    success: true,
+    user,
+  });
+});
